@@ -9,8 +9,6 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -35,12 +33,6 @@ public class ItemArrangement implements Serializable {
     protected ItemArrangementPK itemArrangementPK;
     @Column(name = "QUANTITY")
     private Integer quantity;
-    @JoinColumn(name = "ARR_ID", referencedColumnName = "ARR_ID", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Arrangement arrangement;
-    @JoinColumn(name = "ITEMID", referencedColumnName = "ITEMID", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Item item;
 
     public ItemArrangement() {
     }
@@ -67,22 +59,6 @@ public class ItemArrangement implements Serializable {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-    }
-
-    public Arrangement getArrangement() {
-        return arrangement;
-    }
-
-    public void setArrangement(Arrangement arrangement) {
-        this.arrangement = arrangement;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
     }
 
     @Override

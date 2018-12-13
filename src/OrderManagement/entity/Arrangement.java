@@ -6,22 +6,16 @@
 package entity;
 
 import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -35,12 +29,10 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "Arrangement.findByArrId", query = "SELECT a FROM Arrangement a WHERE a.arrId = :arrId")
     , @NamedQuery(name = "Arrangement.findByArrStyle", query = "SELECT a FROM Arrangement a WHERE a.arrStyle = :arrStyle")
     , @NamedQuery(name = "Arrangement.findByArrSize", query = "SELECT a FROM Arrangement a WHERE a.arrSize = :arrSize")
-    , @NamedQuery(name = "Arrangement.findByArrQuantity", query = "SELECT a FROM Arrangement a WHERE a.arrQuantity = :arrQuantity")})
+    , @NamedQuery(name = "Arrangement.findByArrQuantity", query = "SELECT a FROM Arrangement a WHERE a.arrQuantity = :arrQuantity")
+    , @NamedQuery(name = "Arrangement.findByCustid", query = "SELECT a FROM Arrangement a WHERE a.custid = :custid")
+    , @NamedQuery(name = "Arrangement.findByOrderid", query = "SELECT a FROM Arrangement a WHERE a.orderid = :orderid")})
 public class Arrangement implements Serializable {
-
-    @Size(max = 50)
-    @Column(name = "ARR_STYLE")
-    private String arrStyle;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -49,24 +41,35 @@ public class Arrangement implements Serializable {
     @Size(min = 1, max = 5)
     @Column(name = "ARR_ID")
     private String arrId;
+    @Size(max = 50)
+    @Column(name = "ARR_STYLE")
+    private String arrStyle;
     @Column(name = "ARR_SIZE")
     private Integer arrSize;
     @Column(name = "ARR_QUANTITY")
     private Integer arrQuantity;
-    @JoinColumn(name = "CUSTID", referencedColumnName = "CUSTID")
-    @ManyToOne(optional = false)
-    private Customer custid;
-    @JoinColumn(name = "ORDERID", referencedColumnName = "ORDERID")
-    @ManyToOne(optional = false)
-    private Order1 orderid;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "arrangement")
-    private Collection<ItemArrangement> itemArrangementCollection;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 15)
+    @Column(name = "CUSTID")
+    private String custid;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 15)
+    @Column(name = "ORDERID")
+    private String orderid;
 
     public Arrangement() {
     }
 
     public Arrangement(String arrId) {
         this.arrId = arrId;
+    }
+
+    public Arrangement(String arrId, String custid, String orderid) {
+        this.arrId = arrId;
+        this.custid = custid;
+        this.orderid = orderid;
     }
 
     public String getArrId() {
@@ -101,29 +104,20 @@ public class Arrangement implements Serializable {
         this.arrQuantity = arrQuantity;
     }
 
-    public Customer getCustid() {
+    public String getCustid() {
         return custid;
     }
 
-    public void setCustid(Customer custid) {
+    public void setCustid(String custid) {
         this.custid = custid;
     }
 
-    public Order1 getOrderid() {
+    public String getOrderid() {
         return orderid;
     }
 
-    public void setOrderid(Order1 orderid) {
+    public void setOrderid(String orderid) {
         this.orderid = orderid;
-    }
-
-    @XmlTransient
-    public Collection<ItemArrangement> getItemArrangementCollection() {
-        return itemArrangementCollection;
-    }
-
-    public void setItemArrangementCollection(Collection<ItemArrangement> itemArrangementCollection) {
-        this.itemArrangementCollection = itemArrangementCollection;
     }
 
     @Override

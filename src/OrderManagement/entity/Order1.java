@@ -6,9 +6,7 @@
 package entity;
 
 import java.io.Serializable;
-import java.util.Collection;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,12 +14,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -37,43 +33,44 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "Order1.findByFinaldate", query = "SELECT o FROM Order1 o WHERE o.finaldate = :finaldate")
     , @NamedQuery(name = "Order1.findByOrdertype", query = "SELECT o FROM Order1 o WHERE o.ordertype = :ordertype")
     , @NamedQuery(name = "Order1.findByLocation", query = "SELECT o FROM Order1 o WHERE o.location = :location")
-    , @NamedQuery(name = "Order1.findByCompletedate", query = "SELECT o FROM Order1 o WHERE o.completedate = :completedate")
-    , @NamedQuery(name = "Order1.findByPrice", query = "SELECT o FROM Order1 o WHERE o.price = :price")})
+    , @NamedQuery(name = "Order1.findByPrice", query = "SELECT o FROM Order1 o WHERE o.price = :price")
+    , @NamedQuery(name = "Order1.findByCompletedate", query = "SELECT o FROM Order1 o WHERE o.completedate = :completedate")})
 public class Order1 implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 15)
     @Column(name = "ORDERID")
     private String orderid;
-    @Size(max = 10)
     @Column(name = "ORDERDATE")
     private String orderdate;
-    @Size(max = 10)
     @Column(name = "FINALDATE")
     private String finaldate;
     @Column(name = "ORDERTYPE")
     private Character ordertype;
-    @Size(max = 50)
     @Column(name = "LOCATION")
     private String location;
-    @Size(max = 10)
-    @Column(name = "COMPLETEDATE")
-    private String completedate;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "PRICE")
     private Double price;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order1")
-    private Collection<ItemOrder> itemOrderCollection;
+    @Column(name = "COMPLETEDATE")
+    @Temporal(TemporalType.DATE)
+    private Date completedate;
     @JoinColumn(name = "CUSTID", referencedColumnName = "CUSTID")
     @ManyToOne(optional = false)
     private Customer custid;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderid")
-    private Collection<Arrangement> arrangementCollection;
 
     public Order1() {
+    }
+    public Order1(String orderid, String date, String finaldate, char type, String location, double price, Date completedate, Customer cust) {
+        this.orderid = orderid;
+        this.orderdate = date;
+        this.finaldate = finaldate;
+        this.ordertype = type;
+        this.location = location;
+        this.price = price;
+        this.completedate = completedate;
+        this.custid = cust;
+        
     }
 
     public Order1(String orderid) {
@@ -120,14 +117,6 @@ public class Order1 implements Serializable {
         this.location = location;
     }
 
-    public String getCompletedate() {
-        return completedate;
-    }
-
-    public void setCompletedate(String completedate) {
-        this.completedate = completedate;
-    }
-
     public Double getPrice() {
         return price;
     }
@@ -136,13 +125,12 @@ public class Order1 implements Serializable {
         this.price = price;
     }
 
-    @XmlTransient
-    public Collection<ItemOrder> getItemOrderCollection() {
-        return itemOrderCollection;
+    public Date getCompletedate() {
+        return completedate;
     }
 
-    public void setItemOrderCollection(Collection<ItemOrder> itemOrderCollection) {
-        this.itemOrderCollection = itemOrderCollection;
+    public void setCompletedate(Date completedate) {
+        this.completedate = completedate;
     }
 
     public Customer getCustid() {
@@ -151,15 +139,6 @@ public class Order1 implements Serializable {
 
     public void setCustid(Customer custid) {
         this.custid = custid;
-    }
-
-    @XmlTransient
-    public Collection<Arrangement> getArrangementCollection() {
-        return arrangementCollection;
-    }
-
-    public void setArrangementCollection(Collection<Arrangement> arrangementCollection) {
-        this.arrangementCollection = arrangementCollection;
     }
 
     @Override

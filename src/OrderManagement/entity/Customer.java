@@ -34,10 +34,6 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "Customer.findByCustname", query = "SELECT c FROM Customer c WHERE c.custname = :custname")})
 public class Customer implements Serializable {
 
-    @Size(max = 30)
-    @Column(name = "CUSTNAME")
-    private String custname;
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -45,12 +41,17 @@ public class Customer implements Serializable {
     @Size(min = 1, max = 15)
     @Column(name = "CUSTID")
     private String custid;
+    @Size(max = 30)
+    @Column(name = "CUSTNAME")
+    private String custname;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "custid")
     private Collection<Order1> order1Collection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "custid")
-    private Collection<Arrangement> arrangementCollection;
 
     public Customer() {
+    }
+    public Customer(String id, String name) {
+        this.custid = id;
+        this.custname = name;
     }
 
     public Customer(String custid) {
@@ -65,6 +66,13 @@ public class Customer implements Serializable {
         this.custid = custid;
     }
 
+    public String getCustname() {
+        return custname;
+    }
+
+    public void setCustname(String custname) {
+        this.custname = custname;
+    }
 
     @XmlTransient
     public Collection<Order1> getOrder1Collection() {
@@ -73,15 +81,6 @@ public class Customer implements Serializable {
 
     public void setOrder1Collection(Collection<Order1> order1Collection) {
         this.order1Collection = order1Collection;
-    }
-
-    @XmlTransient
-    public Collection<Arrangement> getArrangementCollection() {
-        return arrangementCollection;
-    }
-
-    public void setArrangementCollection(Collection<Arrangement> arrangementCollection) {
-        this.arrangementCollection = arrangementCollection;
     }
 
     @Override
@@ -107,14 +106,6 @@ public class Customer implements Serializable {
     @Override
     public String toString() {
         return "entity.Customer[ custid=" + custid + " ]";
-    }
-
-    public String getCustname() {
-        return custname;
-    }
-
-    public void setCustname(String custname) {
-        this.custname = custname;
     }
     
 }

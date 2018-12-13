@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-import entity.ItemArrangement;
 import entity.Order1;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.transaction.UserTransaction;
 
 /**
  *
@@ -42,6 +43,11 @@ public class OrderServlet extends HttpServlet {
     @PersistenceContext
     EntityManager em;
 
+    @Resource
+    UserTransaction utx;
+
+    Date d = new Date();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -49,7 +55,6 @@ public class OrderServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
 
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            Date d = new Date();
             String date = formatter.format(d);
             HttpSession session = request.getSession();
             session.setAttribute("today", date);
@@ -58,7 +63,8 @@ public class OrderServlet extends HttpServlet {
             List<Order1> orderlist = query1.getResultList();
 
             List<Order1> todaylistp = new ArrayList<>();
-            List<Order1> todaylistd = new ArrayList<>();
+            List<Order1> todaylistd = new ArrayList<>();            
+            List<Order1> todaylistc = new ArrayList<>();
             List<String> monthlist = new ArrayList<>();
             List<String> yearlist = new ArrayList<>();
 
@@ -67,13 +73,19 @@ public class OrderServlet extends HttpServlet {
             for (Order1 order1 : orderlist) {
                 today = order1.getFinaldate();
                 if (today.equals(date)) {
-                    if (order1.getOrdertype().equals('P')) {
-                        todaylistp.add(order1);
-                    } else {
-                        todaylistd.add(order1);
+                    switch (order1.getOrdertype()) {
+                        case 'P':
+                            todaylistp.add(order1);
+                            break;
+                        case 'D':
+                            todaylistd.add(order1);
+                            break;
+                        default:
+                            todaylistc.add(order1);
+                            break;
                     }
                 }
-                
+
                 month = today.substring(3, 5);
                 switch (month) {
                     case "01":
@@ -143,9 +155,14 @@ public class OrderServlet extends HttpServlet {
                     yearlist.add(year);
                 }
             }
+            
+            session.removeAttribute("todaylistp");
+            session.removeAttribute("todaylistd");
+            session.removeAttribute("todaylistc");
 
             session.setAttribute("todaylistp", todaylistp);
             session.setAttribute("todaylistd", todaylistd);
+            session.setAttribute("todaylistc", todaylistc);
             session.setAttribute("monthlist", monthlist);
             session.setAttribute("yearlist", yearlist);
             session.setAttribute(date, date);
@@ -154,8 +171,37 @@ public class OrderServlet extends HttpServlet {
             rd.forward(request, response);
         } catch (Exception ex) {
             request.setAttribute("alertMsg", ex.getMessage());
-            RequestDispatcher rd = request.getRequestDispatcher("order/order view.jsp");
+            RequestDispatcher rd = request.getRequestDispatcher("order/order_view.jsp");
             rd.include(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String[] list = request.getParameterValues("list");
+            Query query1 = em.createNamedQuery("Order1.findByOrderid", entity.Order1.class);
+
+            for (String string : list) {
+                query1.setParameter("orderid", string);
+                Order1 order = (Order1) query1.getSingleResult();
+                order.setCompletedate(d);
+                order.setOrdertype('C');
+
+                utx.begin();
+                em.merge(order);
+                em.flush();
+                utx.commit();
+            }
+
+            response.sendRedirect("OrderServlet");
+
+        } catch (Exception ex) {
+            request.setAttribute("alertMsg", ex.getMessage());
+            RequestDispatcher rd = request.getRequestDispatcher("order/order_view.jsp");
+            rd.include(request, response);
+            System.out.print(ex.getMessage());
         }
     }
 }
